@@ -14,6 +14,13 @@
  *******************************************************************************/
 package org.eclipse.hudson.scm.subversion;
 
+import hudson.Launcher;
+import hudson.Proc;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import java.io.IOException;
+import org.eclipse.hudson.scm.subversion.browsers.Sventon;
+import org.jvnet.hudson.test.TestBuilder;
 import org.springframework.security.context.SecurityContextHolder;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
@@ -25,32 +32,20 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.FilePath;
-import hudson.Proc;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
 import hudson.model.Result;
-import org.eclipse.hudson.scm.subversion.browsers.Sventon;
-import hudson.triggers.SCMTrigger;
 import hudson.util.StreamTaskListener;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.dom4j.Document;
 import org.dom4j.io.DOMReader;
 import org.jvnet.hudson.test.Bug;
-import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.HudsonHomeLoader.CopyExisting;
-import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
-import org.tmatesoft.svn.core.SVNErrorCode;
-import org.tmatesoft.svn.core.SVNErrorMessage;
-import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
 import org.tmatesoft.svn.core.auth.SVNPasswordAuthentication;
 import org.tmatesoft.svn.core.auth.SVNSSHAuthentication;
@@ -143,41 +138,6 @@ public class SubversionCommonTest extends AbstractSubversionTest {
         submit(form);
     }
 
-    public void testConfigRoundtrip() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
-
-        SubversionSCM scm = new SubversionSCM(
-            Arrays.asList(
-                new SubversionSCM.ModuleLocation(
-                    "https://svn.java.net/svn/hudson~svn/trunk/hudson/test-projects/testSubversionExclusion", "c"),
-                new SubversionSCM.ModuleLocation(
-                    "https://svn.java.net/svn/hudson~svn/trunk/hudson/test-projects/testSubversionExclusion", "d")),
-            true, new Sventon(new URL("http://www.sun.com/"), "test"), "exclude", "user", "revprop", "excludeMessage");
-        p.setScm(scm);
-        WebClient webclient = new WebClient();
-        webclient.setThrowExceptionOnScriptError(false);
-        submit(new WebClient().getPage(p, "configure").getFormByName("config"));
-        verify(scm, (SubversionSCM) p.getScm());
-
-        scm = new SubversionSCM(
-            Arrays.asList(
-                new SubversionSCM.ModuleLocation(
-                    "https://svn.java.net/svn/hudson~svn/trunk/hudson/test-projects/testSubversionExclusion", "c")),
-            false, null, "", "", "", "");
-        p.setScm(scm);
-        submit(webclient.getPage(p, "configure").getFormByName("config"));
-        verify(scm, (SubversionSCM) p.getScm());
-
-        scm = new SubversionSCM(
-            Arrays.asList(
-                new SubversionSCM.ModuleLocation(
-                    "https://svn.java.net/svn/hudson~svn/trunk/hudson/test-projects/testSubversionExclusion", "")),
-            true, null, null, null, null, null);
-        p.setScm(scm);
-        submit(webclient.getPage(p, "configure").getFormByName("config"));
-        verify(scm, (SubversionSCM) p.getScm());
-    }
-
     public void testMasterPolling() throws Exception {
         File repo = new CopyExisting(getClass().getResource("two-revisions.zip")).allocate();
         SubversionSCM scm = new SubversionSCM("file://" + repo.getPath());
@@ -237,34 +197,46 @@ public class SubversionCommonTest extends AbstractSubversionTest {
 
     }
 
-    private void verify(SubversionSCM lhs, SubversionSCM rhs) {
-        SubversionSCM.ModuleLocation[] ll = lhs.getLocations();
-        SubversionSCM.ModuleLocation[] rl = rhs.getLocations();
-        assertEquals(ll.length, rl.length);
-        for (int i = 0; i < ll.length; i++) {
-            assertEquals(ll[i].local, rl[i].local);
-            assertEquals(ll[i].remote, rl[i].remote);
-            assertEquals(ll[i].getDepthOption(), rl[i].getDepthOption());
-            assertEquals(ll[i].isIgnoreExternalsOption(), rl[i].isIgnoreExternalsOption());
-        }
+    public void testUpdateWithCleanUpdater() throws Exception {
+        // this contains an empty "a" file and svn:ignore that ignores b
+        Proc srv = runSvnServe(getClass().getResource("clean-update-test.zip"));
+        try {
+            FreeStyleProject p = createFreeStyleProject();
+            SubversionSCM scm = new SubversionSCM("svn://localhost/");
+            scm.setWorkspaceUpdater(new UpdateWithCleanUpdater());
+            p.setScm(scm);
 
-        assertNullEquals(lhs.getExcludedRegions(), rhs.getExcludedRegions());
-        assertNullEquals(lhs.getExcludedUsers(), rhs.getExcludedUsers());
-        assertNullEquals(lhs.getExcludedRevprop(), rhs.getExcludedRevprop());
-        assertNullEquals(lhs.getExcludedCommitMessages(), rhs.getExcludedCommitMessages());
-        assertNullEquals(lhs.getIncludedRegions(), rhs.getIncludedRegions());
+            p.getBuildersList().add(new TestBuilder() {
+                @Override
+                public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                    FilePath ws = build.getWorkspace();
+                    // create two files
+                    ws.child("b").touch(0);
+                    ws.child("c").touch(0);
+                    return true;
+                }
+            });
+            FreeStyleBuild b = buildAndAssertSuccess(p);
+
+            // this should have created b and c
+            FilePath ws = b.getWorkspace();
+            assertTrue(ws.child("b").exists());
+            assertTrue(ws.child("c").exists());
+
+            // now, remove the builder that makes the workspace dirty and rebuild
+            p.getBuildersList().clear();
+            b = buildAndAssertSuccess(p);
+            System.out.println(b.getLog());
+
+            // those files should have been cleaned
+            ws = b.getWorkspace();
+            assertFalse(ws.child("b").exists());
+            assertFalse(ws.child("c").exists());
+        } finally {
+            srv.kill();
+        }
     }
-
-    private void assertNullEquals(String left, String right) {
-        if (left == null) {
-            left = "";
-        }
-        if (right == null) {
-            right = "";
-        }
-        assertEquals(left, right);
-    }
-
     /**
      * Loads a test Subversion repository into a temporary directory, and creates {@link org.eclipse.hudson.scm.subversion.SubversionSCM} for it.
      */
@@ -272,31 +244,6 @@ public class SubversionCommonTest extends AbstractSubversionTest {
         return new SubversionSCM(
             "file://" + new CopyExisting(getClass().getResource("svn-repo.zip")).allocate().toURI().toURL().getPath()
                 + "trunk/a", "a");
-    }
-
-    private FreeStyleBuild sendCommitTrigger(FreeStyleProject p, boolean includeRevision) throws Exception {
-        String repoUUID = "71c3de6d-444a-0410-be80-ed276b4c234a";
-
-        WebClient wc = new WebClient();
-        WebRequestSettings wr = new WebRequestSettings(new URL(getURL() + "subversion/" + repoUUID + "/notifyCommit"),
-            HttpMethod.POST);
-        wr.setRequestBody("A   trunk/hudson/test-projects/trivial-ant/build.xml");
-        wr.setAdditionalHeader("Content-Type", "text/plain;charset=UTF-8");
-
-        if (includeRevision) {
-            wr.setAdditionalHeader("X-Hudson-Subversion-Revision", "13000");
-        }
-
-        WebConnection conn = wc.getWebConnection();
-        WebResponse resp = conn.getResponse(wr);
-        assertTrue(isGoodHttpStatus(resp.getStatusCode()));
-
-        waitUntilNoActivity();
-        FreeStyleBuild b = p.getLastBuild();
-        assertNotNull(b);
-        assertBuildStatus(Result.SUCCESS, b);
-
-        return b;
     }
 
     private void _idem(SVNAuthentication a) {
