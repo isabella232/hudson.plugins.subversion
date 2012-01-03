@@ -32,7 +32,6 @@ import hudson.model.BuildListener;
 import hudson.model.Computer;
 import hudson.model.Hudson;
 import hudson.model.Hudson.MasterComputer;
-import hudson.model.Items;
 import hudson.model.Node;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
@@ -150,13 +149,9 @@ import static hudson.scm.PollingResult.Change;
  * @author Kohsuke Kawaguchi
  */
 public class SubversionSCM extends SCM implements Serializable {
-
     private static final String HUDSON_SCM_SUBVERSION_ALIAS_NAME = "hudson.scm.SubversionSCM";
-
-    private static final String HUDSON_SCM_SUBVERSION_DESCRIPTOR_ALIAS_NAME = HUDSON_SCM_SUBVERSION_ALIAS_NAME
-        + "$DescriptorImpl";
-    protected static final String SUBVERSION_TAG_ACTION_ALIAS_NAME = "hudson.scm.SubversionTagAction";
-
+    private static final String SVN_SCM_GLOBAL_CONFIG_FILE = "svn-scm-global-config.xml";
+    
     protected static final String UNDEFINED_REVISION_VALUE = "UNDEFINED";
 
     /**
@@ -223,7 +218,6 @@ public class SubversionSCM extends SCM implements Serializable {
     private Boolean useUpdate;
     @Deprecated
     private Boolean doRevert;
-
 
     /**
      * @deprecated as of 1.286
@@ -327,34 +321,7 @@ public class SubversionSCM extends SCM implements Serializable {
         this.includedRegions = includedRegions;
     }
 
-    /**
-     * Initializes aliases to save backward compatibility with old configuration.
-     */
-    public static void initialize() {
-        Items.XSTREAM.alias(HUDSON_SCM_SUBVERSION_ALIAS_NAME, SubversionSCM.class);
-        Items.XSTREAM.alias("hudson.scm.subversion.UpdateUpdater", UpdateUpdater.class);
-        Items.XSTREAM.alias("hudson.scm.subversion.UpdateWithCleanUpdater", UpdateWithCleanUpdater.class);
-        Items.XSTREAM.alias("hudson.scm.subversion.CheckoutUpdater", CheckoutUpdater.class);
-        Items.XSTREAM.alias("hudson.scm.subversion.CheckoutWithLocationFoldersCleanupUpdater",
-            CheckoutWithLocationFoldersCleanupUpdater.class);
-        Items.XSTREAM.alias("hudson.scm.subversion.UpdateWithRevertUpdater", UpdateWithRevertUpdater.class);
-        Items.XSTREAM.alias("hudson.scm.PerJobCredentialStore", PerJobCredentialStore.class);
-        Items.XSTREAM.alias("hudson.scm.SubversionChangeLogParser", SubversionChangeLogParser.class);
-        Items.XSTREAM.alias("hudson.scm.SVNRevisionState", SVNRevisionState.class);
-        Items.XSTREAM.alias("hudson.scm.SubversionSCM$ModuleLocation", ModuleLocation.class);
-        XmlFile.DEFAULT_XSTREAM.alias("hudson.scm.SubversionSCM$DescriptorImpl$PasswordCredential",
-            DescriptorImpl.PasswordCredential.class);
-        XmlFile.DEFAULT_XSTREAM.alias("hudson.scm.SubversionSCM$DescriptorImpl$SshPublicKeyCredential",
-            DescriptorImpl.SshPublicKeyCredential.class);
-        XmlFile.DEFAULT_XSTREAM.alias("hudson.scm.SubversionSCM$DescriptorImpl$SslClientCertificateCredential",
-            DescriptorImpl.SslClientCertificateCredential.class);
-        XmlFile.DEFAULT_XSTREAM.alias(HUDSON_SCM_SUBVERSION_DESCRIPTOR_ALIAS_NAME, DescriptorImpl.class);
-        Run.XSTREAM.alias(SUBVERSION_TAG_ACTION_ALIAS_NAME, SubversionTagAction.class);
-        Hudson.XSTREAM.alias(SUBVERSION_TAG_ACTION_ALIAS_NAME, SubversionTagAction.class);
-        Items.XSTREAM.alias(SUBVERSION_TAG_ACTION_ALIAS_NAME, SubversionTagAction.class);
-        XmlFile.DEFAULT_XSTREAM.alias(SUBVERSION_TAG_ACTION_ALIAS_NAME, SubversionTagAction.class);
-    }
-
+     
     /**
      * Convenience constructor, especially during testing.
      */
@@ -1152,6 +1119,7 @@ public class SubversionSCM extends SCM implements Serializable {
         final SVNLogHandler logHandler = new SVNLogHandler(listener);
         // figure out the remote revisions
         final ISVNAuthenticationProvider authProvider = getDescriptor().createAuthenticationProvider(project);
+        final ModuleLocation[] moduleLocations = getLocations(lastCompletedBuild);
 
         return ch.call(new DelegatingCallable<PollingResult, IOException>() {
             public ClassLoader getClassLoader() {
@@ -1181,7 +1149,7 @@ public class SubversionSCM extends SCM implements Serializable {
                     */
                     revs.put(url, baseRev);
                     // skip baselineInfo if build location URL contains revision like svn://svnserver/scripts@184375
-                    if (!isRevisionSpecifiedInBuildLocation(url, lastCompletedBuild)) {
+                    if (!isRevisionSpecifiedInBuildLocation(url, moduleLocations)) {
                         try {
                             final SVNURL svnurl = SVNURL.parseURIDecoded(url);
                             long nowRev = new SvnInfo(parseSvnInfo(svnurl, authProvider)).revision;
@@ -1210,13 +1178,14 @@ public class SubversionSCM extends SCM implements Serializable {
     }
 
     /**
-     * Checks whether build location contains specified revision.
+     * Checks whether module locations contain specified revision.
+     *
      * @param url url to verify.
-     * @param lastCompletedBuild build.
+     * @param moduleLocations module location.
      * @return true if build location contains specified revision.
      */
-    boolean isRevisionSpecifiedInBuildLocation(String url, AbstractBuild<?, ?> lastCompletedBuild) {
-        for (ModuleLocation location : getLocations(lastCompletedBuild)) {
+    boolean isRevisionSpecifiedInBuildLocation(String url, ModuleLocation[] moduleLocations) {
+        for (ModuleLocation location : moduleLocations) {
             if(location.getURL() != null && location.getURL().contains(url)){
                 SVNRevision revision = getRevisionFromRemoteUrl(location.getOriginRemote());
                 if (isRevisionPresent(revision)) {
@@ -1466,16 +1435,6 @@ public class SubversionSCM extends SCM implements Serializable {
          */
         private boolean validateRemoteUpToVar = false;
 
-        /**
-         * Returns descriptor id.
-         * We return old class name to save backward compatibility of global configuration.
-         *
-         * @return descriptor id.
-         */
-        @Override
-        public String getId() {
-            return HUDSON_SCM_SUBVERSION_ALIAS_NAME;
-        }
 
         /**
          * Stores {@link SVNAuthentication} for a single realm.
@@ -1698,6 +1657,31 @@ public class SubversionSCM extends SCM implements Serializable {
         public String getDisplayName() {
             return "Subversion";
         }
+
+        /**
+         * Returns descriptor id.
+         * We return old class name to save backward compatibility of global configuration and jelly files.
+         *
+         * @return descriptor id.
+         */
+        @Override
+        public String getId() {
+            return HUDSON_SCM_SUBVERSION_ALIAS_NAME;
+        }
+
+        @Override
+        public XmlFile getConfigFile() {
+            File hudsonRoot = Hudson.getInstance().getRootDir();
+            File globalConfigFile = new File(hudsonRoot , SVN_SCM_GLOBAL_CONFIG_FILE);
+            
+            // For backward Compatibility
+            File oldGlobalConfigFile = new File(hudsonRoot, "hudson.scm.SubversionSCM.xml");
+            if (oldGlobalConfigFile.exists()){
+                oldGlobalConfigFile.renameTo(globalConfigFile);
+            }
+            return new XmlFile(globalConfigFile);
+        }
+        
 
         public String getGlobalExcludedRevprop() {
             return globalExcludedRevprop;
