@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.eclipse.hudson.plugins</groupId>
         <artifactId>hudson-plugin-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0-M0-1</version>
     </parent>
 
     <artifactId>subversion</artifactId>
@@ -82,6 +82,13 @@
             <artifactId>trilead-putty-extension</artifactId>
             <version>1.1</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hudson.main</groupId>
+            <artifactId>hudson-war</artifactId>
+            <version>3.0.0-M0-1</version>
+            <scope>test</scope>
+            <classifier>war-for-test</classifier>
         </dependency>
     </dependencies>
 
