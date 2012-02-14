@@ -23,7 +23,7 @@ import java.util.Map;
  * {@link hudson.scm.SCMRevisionState} for {@link SubversionSCM}. {@link Serializable} since we compute
  * this remote.
  */
-final class SVNRevisionState extends SCMRevisionState implements Serializable {
+public final class SVNRevisionState extends SCMRevisionState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -32,7 +32,7 @@ final class SVNRevisionState extends SCMRevisionState implements Serializable {
      * are implicitly pulled in via svn:externals, but it excludes those locations that
      * are added via svn:externals in a way that fixes revisions.
      */
-    final Map<String,Long> revisions;
+    public final Map<String,Long> revisions;
 
     SVNRevisionState(Map<String, Long> revisions) {
         this.revisions = revisions;

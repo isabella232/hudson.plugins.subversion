@@ -1536,7 +1536,7 @@ public class SubversionSCM extends SCM implements Serializable {
         /**
          * See {@link DescriptorImpl#createAuthenticationProvider(AbstractProject)}.
          */
-        static final class SVNAuthenticationProviderImpl
+        public static final class SVNAuthenticationProviderImpl
             implements ISVNAuthenticationProvider, ISVNAuthenticationOutcomeListener, Serializable {
             /**
              * Project-scoped authentication source. For historical reasons, can be null.
@@ -1564,7 +1564,7 @@ public class SubversionSCM extends SCM implements Serializable {
              *
              * @return local SVNAuthenticationProvide (PerJobCredentialStore).
              */
-            RemotableSVNAuthenticationProvider getLocal() {
+            public RemotableSVNAuthenticationProvider getLocal() {
                 return local;
             }
 
@@ -2221,7 +2221,7 @@ public class SubversionSCM extends SCM implements Serializable {
         return false;
     }
 
-    static final Pattern URL_PATTERN = Pattern.compile("(https?|svn(\\+[a-z0-9]+)?|file)://.+");
+    public static final Pattern URL_PATTERN = Pattern.compile("(https?|svn(\\+[a-z0-9]+)?|file)://.+");
 
     private static final long serialVersionUID = 1L;
 
@@ -2534,7 +2534,7 @@ public class SubversionSCM extends SCM implements Serializable {
     }
 
     /*package*/
-    static boolean compareSVNAuthentications(SVNAuthentication a1, SVNAuthentication a2) {
+    public static boolean compareSVNAuthentications(SVNAuthentication a1, SVNAuthentication a2) {
         if (a1 == null && a2 == null) {
             return true;
         }

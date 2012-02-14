@@ -40,7 +40,7 @@ import static org.eclipse.hudson.scm.subversion.SubversionSCM.DescriptorImpl.Cre
  *
  * @author Kohsuke Kawaguchi
  */
-final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorImpl.RemotableSVNAuthenticationProvider {
+public final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorImpl.RemotableSVNAuthenticationProvider {
     private static final Logger LOGGER = Logger.getLogger(PerJobCredentialStore.class.getName());
 
     /**
@@ -61,7 +61,7 @@ final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorI
      */
     private final Map<String, Credential> credentials = new Hashtable<String, Credential>();
 
-    PerJobCredentialStore(AbstractProject<?, ?> project, String url) {
+    public PerJobCredentialStore(AbstractProject<?, ?> project, String url) {
         this.project = project;
         this.url = url;
         // read existing credential
@@ -129,7 +129,7 @@ final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorI
         }
     }
 
-    XmlFile getXmlFile(Job prj) {
+    public XmlFile getXmlFile(Job prj) {
         //default behaviour
         File rootDir = prj.getRootDir();
         File credentialFile = new File(rootDir, credentialsFileName);
@@ -150,7 +150,7 @@ final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorI
     }
 
     /*package*/
-    synchronized boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return credentials.isEmpty();
     }
 
@@ -166,7 +166,7 @@ final class PerJobCredentialStore implements Saveable, SubversionSCM.DescriptorI
         return c == null ? this : c.export(SubversionSCM.DescriptorImpl.RemotableSVNAuthenticationProvider.class, this);
     }
 
-    protected CredentialsSaveableListener getSaveableListener() {
+    public CredentialsSaveableListener getSaveableListener() {
         if (null == saveableListener) {
             ExtensionList<SaveableListener> extensionList = Hudson.getInstance().getExtensionList(
                 SaveableListener.class);
