@@ -14,12 +14,12 @@
  *******************************************************************************/
 package org.eclipse.hudson.scm.subversion.credential;
 
-import com.trilead.ssh2.crypto.Base64;
 import org.eclipse.hudson.scm.subversion.SubversionSCM;
 import hudson.util.Scrambler;
 import hudson.util.Secret;
 import java.io.File;
 import java.io.IOException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
@@ -39,19 +39,15 @@ public class SslClientCertificateCredential extends SubversionSCM.DescriptorImpl
     public SslClientCertificateCredential(File certificate, String password) throws IOException {
         this.password = Scrambler.scramble(password);
         this.certificate = Secret.fromString(
-            new String(Base64.encode(FileUtils.readFileToByteArray(certificate))));
+            new String(Base64.encodeBase64(FileUtils.readFileToByteArray(certificate))));
     }
 
     @Override
     public SVNAuthentication createSVNAuthentication(String kind) {
         if (kind.equals(ISVNAuthenticationManager.SSL)) {
-            try {
-                return new SVNSSLAuthentication(
-                    Base64.decode(certificate.getPlainText().toCharArray()),
+            return new SVNSSLAuthentication(
+                    Base64.decodeBase64(certificate.getPlainText()),
                     Scrambler.descramble(password), false);
-            } catch (IOException e) {
-                throw new Error(e); // can't happen
-            }
         } else {
             return null; // unexpected authentication type
         }

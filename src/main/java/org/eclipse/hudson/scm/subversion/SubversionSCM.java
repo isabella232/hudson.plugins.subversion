@@ -17,8 +17,6 @@
 package org.eclipse.hudson.scm.subversion;
 
 import com.thoughtworks.xstream.XStream;
-import com.trilead.ssh2.DebugLogger;
-import com.trilead.ssh2.SCPClient;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
@@ -2529,22 +2527,10 @@ public class SubversionSCM extends SCM implements Serializable {
      * Enables trace logging of Ganymed SSH library.
      * <p/>
      * Intended to be invoked from Groovy console.
+     * @deprecated 
      */
     public static void enableSshDebug(Level level) {
-        if (level == null) {
-            level = Level.FINEST; // default
-        }
-
-        final Level lv = level;
-
-        com.trilead.ssh2.log.Logger.enabled = true;
-        com.trilead.ssh2.log.Logger.logger = new DebugLogger() {
-            private final Logger LOGGER = Logger.getLogger(SCPClient.class.getPackage().getName());
-
-            public void log(int level, String className, String message) {
-                LOGGER.log(lv, className + ' ' + message);
-            }
-        };
+        // In latest version of Ganymed we can't set trace level
     }
 
     /*package*/

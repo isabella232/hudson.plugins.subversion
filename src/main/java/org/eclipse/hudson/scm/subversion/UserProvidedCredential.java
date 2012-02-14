@@ -33,7 +33,6 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import org.apache.commons.fileupload.FileItem;
-import org.kohsuke.putty.PuTTYKey;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerRequest;
 import org.tmatesoft.svn.core.SVNCancelException;
@@ -47,6 +46,7 @@ import org.tmatesoft.svn.core.internal.wc.DefaultSVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.wc.SVNErrorManager;
 
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import org.kohsuke.putty.PuTTYKey;
 
 /**
  * Represents the SVN authentication credential given by the user via the &lt;enterCredential> form fragment.

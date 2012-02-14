@@ -24,7 +24,7 @@
     <packaging>hpi</packaging>
     <name>Hudson Subversion Plug-in</name>
     <description>Integrates Hudson with Subversion SCM</description>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <url>http://wiki.hudson-ci.org/display/HUDSON/Subversion+Plugin</url>
     <licenses>
         <license>
@@ -33,6 +33,19 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    
+    <scm>
+        <connection>scm:git:git://github.com/hudson-plugins/subversion-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:hudson-plugins/subversion-plugin.git</developerConnection>
+        <url>https://github.com/hudson-plugins/subversion-plugin</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Many</name>
+            <id>kohsuke abayer dodok1 dty huybrechts mindless pgweiss stephenconnolly rseguy wjprakash akozak 8nevil8</id>
+        </developer>
+    </developers>
 
     <properties>
         <compileSource>1.6</compileSource>
@@ -58,6 +71,17 @@
                     <artifactId>subversion</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.hudson</groupId>
+            <artifactId>ganymed-ssh-2</artifactId>
+            <version>build260</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>trilead-putty-extension</artifactId>
+            <version>1.1</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
@@ -135,16 +159,4 @@
         </profile>
     </profiles>
 
-    <scm>
-        <connection>scm:git:git://github.com/hudson-plugins/subversion-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:hudson-plugins/subversion-plugin.git</developerConnection>
-        <url>https://github.com/hudson-plugins/subversion-plugin</url>
-    </scm>
-
-    <developers>
-        <developer>
-            <name>Many</name>
-            <id>kohsuke abayer dodok1 dty huybrechts mindless pgweiss stephenconnolly rseguy wjprakash akozak 8nevil8</id>
-        </developer>
-    </developers>
 </project>
