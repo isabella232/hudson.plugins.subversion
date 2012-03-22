@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 
 import hudson.matrix.MatrixProject;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.hudson.scm.subversion.PluginImpl;
+import hudson.scm.subversion.PluginImpl;
 import org.junit.Before;
 
 public abstract class BaseLegacyConverterTest {

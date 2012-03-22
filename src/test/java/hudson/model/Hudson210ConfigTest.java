@@ -15,7 +15,7 @@
 package hudson.model;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.hudson.scm.subversion.SubversionSCM;
+import hudson.scm.subversion.SubversionSCM;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -47,7 +47,7 @@ public class Hudson210ConfigTest extends BaseLegacyConverterTest {
         assertTrue(StringUtils.isEmpty(scm.getExcludedUsers()));
         assertTrue(StringUtils.isEmpty(scm.getExcludedRevprop()));
         assertTrue(StringUtils.isEmpty(scm.getExcludedCommitMessages()));
-        assertEquals(scm.getWorkspaceUpdater().getClass().getName(), "org.eclipse.hudson.scm.subversion.UpdateUpdater");
+        assertEquals(scm.getWorkspaceUpdater().getClass().getName(), "hudson.scm.subversion.UpdateUpdater");
     }
 
     @Test
