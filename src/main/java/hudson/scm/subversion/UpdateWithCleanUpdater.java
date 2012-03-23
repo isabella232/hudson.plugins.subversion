@@ -15,7 +15,7 @@
 package hudson.scm.subversion;
 
 import hudson.Extension;
-import hudson.scm.subversion.SubversionSCM.ModuleLocation;
+import hudson.scm.SubversionSCM.ModuleLocation;
 import org.apache.commons.io.FileUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.tmatesoft.svn.core.SVNDepth;

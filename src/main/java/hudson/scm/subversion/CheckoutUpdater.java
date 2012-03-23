@@ -19,8 +19,8 @@ package hudson.scm.subversion;
 
 import hudson.Extension;
 import hudson.Util;
-import hudson.scm.subversion.SubversionSCM.External;
-import hudson.scm.subversion.SubversionSCM.ModuleLocation;
+import hudson.scm.SubversionSCM.External;
+import hudson.scm.SubversionSCM.ModuleLocation;
 import hudson.util.IOException2;
 import hudson.util.StreamCopyThread;
 import org.kohsuke.stapler.DataBoundConstructor;

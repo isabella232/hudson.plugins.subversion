@@ -15,7 +15,7 @@
 package hudson.scm.subversion;
 
 import hudson.Extension;
-import hudson.scm.subversion.SubversionSCM.ModuleLocation;
+import hudson.scm.SubversionSCM.ModuleLocation;
 import java.io.File;
 import java.io.IOException;
 import org.kohsuke.stapler.DataBoundConstructor;

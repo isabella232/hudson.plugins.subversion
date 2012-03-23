@@ -15,7 +15,8 @@
 package hudson.scm.subversion;
 
 import hudson.remoting.Which;
-import hudson.scm.subversion.SubversionSCM.External;
+import hudson.scm.SubversionEventHandlerImpl;
+import hudson.scm.SubversionSCM.External;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;

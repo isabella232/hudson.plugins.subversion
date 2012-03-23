@@ -18,9 +18,9 @@ package hudson.scm.subversion;
 
 import hudson.Extension;
 import hudson.model.Hudson;
-import hudson.scm.subversion.SubversionSCM.External;
-import hudson.scm.subversion.SubversionSCM.ModuleLocation;
-import hudson.scm.subversion.SubversionSCM.SvnInfo;
+import hudson.scm.SubversionSCM.External;
+import hudson.scm.SubversionSCM.ModuleLocation;
+import hudson.scm.SubversionSCM.SvnInfo;
 import hudson.triggers.SCMTrigger;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.tmatesoft.svn.core.SVNDepth;

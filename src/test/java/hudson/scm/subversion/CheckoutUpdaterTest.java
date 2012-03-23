@@ -14,9 +14,7 @@
  *******************************************************************************/
 package hudson.scm.subversion;
 
-import hudson.scm.subversion.SubversionSCM;
-import hudson.scm.subversion.WorkspaceUpdater;
-import hudson.scm.subversion.CheckoutUpdater;
+import hudson.scm.SubversionSCM;
 import org.junit.Test;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
