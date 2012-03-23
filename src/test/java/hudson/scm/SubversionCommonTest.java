@@ -36,7 +36,6 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.scm.browsers.Sventon;
-import hudson.scm.credential.SVNSSLAuthentication;
 import hudson.scm.subversion.UpdateUpdater;
 import hudson.util.StreamTaskListener;
 import java.io.File;
@@ -45,7 +44,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.dom4j.Document;
 import org.dom4j.io.DOMReader;
 import org.junit.Ignore;
@@ -67,6 +65,8 @@ import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNCommitClient;
 
 import static hudson.scm.SubversionSCM.compareSVNAuthentications;
+import org.springframework.security.context.SecurityContextHolder;
+import org.tmatesoft.svn.core.auth.*;
 
 /**
  * @author Kohsuke Kawaguchi
