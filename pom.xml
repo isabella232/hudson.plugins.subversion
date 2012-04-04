@@ -8,7 +8,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 # Contributors:
-# Kohsuke Kawaguchi, Daniel Dyer, Erik Ramfelt, Stephen Connolly, Tom Huybrechts, Alan Harder
+#   Kohsuke Kawaguchi, Daniel Dyer, Erik Ramfelt, Stephen Connolly, Tom Huybrechts, Alan Harder, Winston Prakash
 #
 #************************************************************************** -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -35,9 +35,9 @@
     </licenses>
     
     <scm>
-        <connection>scm:git:git://github.com/hudson-plugins/subversion-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:hudson-plugins/subversion-plugin.git</developerConnection>
-        <url>https://github.com/hudson-plugins/subversion-plugin</url>
+        <connection>scm:git:git://git.eclipse.org/gitroot/hudson/org.eclipse.hudson.plugins.subversion.git</connection>
+        <developerConnection>scm:git:ssh://git.eclipse.org/gitroot/hudson/org.eclipse.hudson.plugins.subversion.git</developerConnection>
+        <url>http://git.eclipse.org/c/hudson/org.eclipse.hudson.plugins.subversion.git/</url>
     </scm>
 
     <developers>
@@ -82,13 +82,6 @@
             <artifactId>trilead-putty-extension</artifactId>
             <version>1.1</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hudson.main</groupId>
-            <artifactId>hudson-war</artifactId>
-            <version>3.0.0-M0-1</version>
-            <scope>test</scope>
-            <classifier>war-for-test</classifier>
         </dependency>
     </dependencies>
 
