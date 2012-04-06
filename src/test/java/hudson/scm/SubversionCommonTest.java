@@ -261,6 +261,7 @@ public class SubversionCommonTest extends AbstractSubversionTest {
     public void testInfiniteLoop() throws Exception {
         //Start local svn repository
         Proc server = runSvnServe(getClass().getResource(GUEST_ACCESS_REPOSITORY_RESOURCE));
+        if (server != null){
         SVNURL repo = SVNURL.parseURIDecoded(SVN_URL);
         try {
             // creates a purely in memory auth manager
@@ -308,6 +309,9 @@ public class SubversionCommonTest extends AbstractSubversionTest {
             fail("Looks like we went into an infinite loop");
         } finally {
             server.kill();
+        }
+        }else{
+            System.out.println("Skipping testSuperUserForAllRepos. Light weight SVN Server (svnserve) could not be started.");
         }
     }
 

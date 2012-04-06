@@ -46,7 +46,6 @@ import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.TestBuilder;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 
-
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -55,78 +54,91 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
     String kind = ISVNAuthenticationManager.PASSWORD;
 
     /**
-     * Ensures that the introduction of {@link hudson.scm.subversion.WorkspaceUpdater} maintains backward compatibility with
-     * existing data.
+     * Ensures that the introduction of {@link hudson.scm.subversion.WorkspaceUpdater}
+     * maintains backward compatibility with existing data.
      */
     public void testWorkspaceUpdaterCompatibility() throws Exception {
         Proc p = runSvnServe(getClass().getResource("small.zip"));
-        try {
-            verifyCompatibility("legacy-update.xml", UpdateUpdater.class);
-            verifyCompatibility("legacy-checkout.xml", CheckoutUpdater.class);
-            verifyCompatibility("legacy-revert.xml", UpdateWithRevertUpdater.class);
-        } finally {
-            p.kill();
+        if (p != null) {
+            try {
+                verifyCompatibility("legacy-update.xml", UpdateUpdater.class);
+                verifyCompatibility("legacy-checkout.xml", CheckoutUpdater.class);
+                verifyCompatibility("legacy-revert.xml", UpdateWithRevertUpdater.class);
+            } finally {
+                p.kill();
+            }
+        } else {
+            System.out.println("Skipping testWorkspaceUpdaterCompatibility. Light weight SVN Server (svnserve) could not be started.");
         }
     }
 
     public void testUpdateWithCleanUpdater() throws Exception {
         // this contains an empty "a" file and svn:ignore that ignores b
         Proc srv = runSvnServe(getClass().getResource("clean-update-test.zip"));
-        try {
-            FreeStyleProject p = createFreeStyleProject();
-            SubversionSCM scm = new SubversionSCM("svn://localhost/");
-            scm.setWorkspaceUpdater(new UpdateWithCleanUpdater());
-            p.setScm(scm);
+        if (srv != null) {
+            try {
+                FreeStyleProject p = createFreeStyleProject();
+                SubversionSCM scm = new SubversionSCM("svn://localhost/");
+                scm.setWorkspaceUpdater(new UpdateWithCleanUpdater());
+                p.setScm(scm);
 
-            p.getBuildersList().add(new TestBuilder() {
-                @Override
-                public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-                    throws InterruptedException, IOException {
-                    FilePath ws = build.getWorkspace();
-                    // create two files
-                    ws.child("b").touch(0);
-                    ws.child("c").touch(0);
-                    return true;
-                }
-            });
-            FreeStyleBuild b = buildAndAssertSuccess(p);
+                p.getBuildersList().add(new TestBuilder() {
 
-            // this should have created b and c
-            FilePath ws = b.getWorkspace();
-            assertTrue(ws.child("b").exists());
-            assertTrue(ws.child("c").exists());
+                    @Override
+                    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                            throws InterruptedException, IOException {
+                        FilePath ws = build.getWorkspace();
+                        // create two files
+                        ws.child("b").touch(0);
+                        ws.child("c").touch(0);
+                        return true;
+                    }
+                });
+                FreeStyleBuild b = buildAndAssertSuccess(p);
 
-            // now, remove the builder that makes the workspace dirty and rebuild
-            p.getBuildersList().clear();
-            b = buildAndAssertSuccess(p);
-            System.out.println(b.getLog());
+                // this should have created b and c
+                FilePath ws = b.getWorkspace();
+                assertTrue(ws.child("b").exists());
+                assertTrue(ws.child("c").exists());
 
-            // those files should have been cleaned
-            ws = b.getWorkspace();
-            assertFalse(ws.child("b").exists());
-            assertFalse(ws.child("c").exists());
-        } finally {
-            srv.kill();
+                // now, remove the builder that makes the workspace dirty and rebuild
+                p.getBuildersList().clear();
+                b = buildAndAssertSuccess(p);
+                System.out.println(b.getLog());
+
+                // those files should have been cleaned
+                ws = b.getWorkspace();
+                assertFalse(ws.child("b").exists());
+                assertFalse(ws.child("c").exists());
+            } finally {
+                srv.kill();
+            }
+        } else {
+            System.out.println("Skipping testUpdateWithCleanUpdater. Light weight SVN Server (svnserve) could not be started.");
         }
     }
 
     /**
-     * Used for experimenting the memory leak problem.
-     * This test by itself doesn't detect that, but I'm leaving it in anyway.
+     * Used for experimenting the memory leak problem. This test by itself
+     * doesn't detect that, but I'm leaving it in anyway.
      */
     @Bug(8061)
     public void testPollingLeak() throws Exception {
         Proc p = runSvnServe(getClass().getResource("small.zip"));
-        try {
-            FreeStyleProject b = createFreeStyleProject();
-            b.setScm(new SubversionSCM("svn://localhost/"));
-            b.setAssignedNode(createSlave());
+        if (p != null) {
+            try {
+                FreeStyleProject b = createFreeStyleProject();
+                b.setScm(new SubversionSCM("svn://localhost/"));
+                b.setAssignedNode(createSlave());
 
-            assertBuildStatusSuccess(b.scheduleBuild2(0));
+                assertBuildStatusSuccess(b.scheduleBuild2(0));
 
-            b.poll(new StreamTaskListener(System.out, Charset.defaultCharset()));
-        } finally {
-            p.kill();
+                b.poll(new StreamTaskListener(System.out, Charset.defaultCharset()));
+            } finally {
+                p.kill();
+            }
+        } else {
+            System.out.println("Skipping testPollingLeak. Light weight SVN Server (svnserve) could not be started.");
         }
     }
 
@@ -136,6 +148,7 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
     @Bug(7539)
     public void testExternalsToFile() throws Exception {
         Proc server = runSvnServe(getClass().getResource("HUDSON-7539.zip"));
+        if (server != null) {
         try {
             // enable 1.6 mode
             HtmlForm f = createWebClient().goTo("configure").getFormByName("config");
@@ -154,11 +167,14 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
             assertBuildStatusSuccess(p.scheduleBuild2(0));
         } finally {
             server.kill();
+        } 
+        }else {
+            System.out.println("Skipping testExternalsToFile. Light weight SVN Server (svnserve) could not be started.");
         }
     }
 
     private void verifyCompatibility(String resourceName, Class<? extends WorkspaceUpdater> expected)
-        throws IOException {
+            throws IOException {
         InputStream io = null;
         AbstractProject job = null;
         try {
