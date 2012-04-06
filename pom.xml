@@ -73,6 +73,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.hudsonci.plugins</groupId>
+            <artifactId>jna-native-support-plugin</artifactId>
+            <version>3.0.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jvnet.hudson</groupId>
             <artifactId>ganymed-ssh-2</artifactId>
             <version>build260</version>
