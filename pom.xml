@@ -24,7 +24,7 @@
     <packaging>hpi</packaging>
     <name>Hudson Subversion Plug-in</name>
     <description>Integrates Hudson with Subversion SCM</description>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.1</version>
     <url>http://wiki.hudson-ci.org/display/HUDSON/Subversion+Plugin</url>
     <licenses>
         <license>
