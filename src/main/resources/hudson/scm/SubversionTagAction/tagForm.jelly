@@ -94,7 +94,7 @@
             <f:optionalBlock field="credential" title="${%Use alternate credential for tagging}">
               <f:block>
                 <table style="width:100%">
-                  <x:enterCredential xmlns:x="/org/eclipse/hudson/scm/subversion" />
+                  <x:enterCredential xmlns:x="/hudson/scm/subversion" />
                 </table>
               </f:block>
             </f:optionalBlock>
