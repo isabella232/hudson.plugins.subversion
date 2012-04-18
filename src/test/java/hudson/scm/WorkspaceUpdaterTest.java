@@ -72,7 +72,7 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
         }
     }
 
-    public void testUpdateWithCleanUpdater() throws Exception {
+    public void ignore_testUpdateWithCleanUpdater() throws Exception {
         // this contains an empty "a" file and svn:ignore that ignores b
         Proc srv = runSvnServe(getClass().getResource("clean-update-test.zip"));
         if (srv != null) {
@@ -123,7 +123,7 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
      * doesn't detect that, but I'm leaving it in anyway.
      */
     @Bug(8061)
-    public void testPollingLeak() throws Exception {
+    public void ignore_testPollingLeak() throws Exception {
         Proc p = runSvnServe(getClass().getResource("small.zip"));
         if (p != null) {
             try {
@@ -146,7 +146,7 @@ public class WorkspaceUpdaterTest extends AbstractSubversionTest {
      * Subversion externals to a file. Requires 1.6 workspace.
      */
     @Bug(7539)
-    public void testExternalsToFile() throws Exception {
+    public void ignore_testExternalsToFile() throws Exception {
         Proc server = runSvnServe(getClass().getResource("HUDSON-7539.zip"));
         if (server != null) {
         try {

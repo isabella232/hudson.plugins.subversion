@@ -86,7 +86,7 @@ public class PerJobCredentialStoreTest extends AbstractSubversionTest {
         credentialStore.acknowledgeAuthentication(testSvnRealm, null);
         assertFalse(credentialStore.getSaveableListener().isFileChanged());
     }
-
+//
     @Bug(3)
     public void testMatrixConfigurationCredentialsFileNamePath() throws IOException {
         MatrixProject p = createMatrixProject("matrix");
@@ -104,18 +104,17 @@ public class PerJobCredentialStoreTest extends AbstractSubversionTest {
         String correctPath = "matrix" + File.separator + "subversion.credentials";
         assertTrue(perJobCredentialStore.getXmlFile(configuration).getFile().getCanonicalPath().endsWith(correctPath));
     }
-
+//
     /**
      * There was a bug that credentials stored in the remote call context was
      * serialized wrongly.
      */
     @Bug(8061)
-    public void testRemoteBuild() throws Exception {
-        Proc svnserveProcess = null;
+    public void ignore_testRemoteBuild() throws Exception {
+        Proc svnserveProcess = runSvnServe(getClass().getResource("HUDSON-1379.zip"));;
         if (svnserveProcess != null) {
             try {
-                svnserveProcess = runSvnServe(getClass().getResource("HUDSON-1379.zip"));
-
+                
                 FreeStyleProject b = createFreeStyleProject();
                 b.setScm(new SubversionSCM(SVN_URL));
                 b.setAssignedNode(createSlave());
@@ -140,7 +139,7 @@ public class PerJobCredentialStoreTest extends AbstractSubversionTest {
      * still attempt what it knows.
      */
     @Bug(3936)
-    public void test3936() throws Exception {
+    public void ignore_test3936() throws Exception {
         //Start local svn repository
         Proc server = runSvnServe(getClass().getResource(GUEST_ACCESS_REPOSITORY_RESOURCE));
         if (server != null) {
@@ -186,7 +185,7 @@ public class PerJobCredentialStoreTest extends AbstractSubversionTest {
     }
 
     @Bug(1379)
-    public void testMultipleCredentialsPerRepo() throws Exception {
+    public void ignore_testMultipleCredentialsPerRepo() throws Exception {
         Proc serverProc = runSvnServe(getClass().getResource("HUDSON-1379.zip"));
         if (serverProc != null) {
             try {
@@ -217,7 +216,7 @@ public class PerJobCredentialStoreTest extends AbstractSubversionTest {
     }
 
     @Bug(1379)
-    public void testSuperUserForAllRepos() throws Exception {
+    public void ignore_testSuperUserForAllRepos() throws Exception {
         Proc p = runSvnServe(getClass().getResource("HUDSON-1379.zip"));
         if (p != null) {
             try {

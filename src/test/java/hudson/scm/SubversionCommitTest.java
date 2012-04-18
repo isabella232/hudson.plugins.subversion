@@ -228,16 +228,25 @@ public class SubversionCommitTest extends AbstractSubversionTest {
         FreeStyleProject p = createFreeStyleProject("testExcludedRegions");
         p.setScm(scm);
         assertBuildStatusSuccess(p.scheduleBuild2(0).get());
-
-        // initial polling on the slave for the code path that doesn't find any change
-        assertFalse("Polling should not have any changes for an initially created slave",
-        	p.poll(createTaskListener()).hasChanges());
         
-        createCommit(scm, "bar");
+        // initial polling on the master for the code path that doesn't find any change
+        PollingResult pollResult = p.poll(createTaskListener());
+        if (pollResult.getChange() != PollingResult.Change.INCOMPARABLE) {
+            boolean hasChanges = pollResult.hasChanges();
+            assertFalse("Polling should not have any changes for an initially created slave",
+                    hasChanges);
+        }
 
-        // polling on the slave for the code path that does have a change but should be excluded.
-        assertFalse("Polling found changes that should have been ignored",
-            p.poll(createTaskListener()).hasChanges());
+       
+        createCommit(scm, "bar");
+        
+         // initial polling on the master for the code path that doesn't find any change
+        pollResult = p.poll(createTaskListener());
+        if (pollResult.getChange() != PollingResult.Change.INCOMPARABLE) {
+            boolean hasChanges = pollResult.hasChanges();
+            assertFalse("Polling found changes that should have been ignored",
+                    hasChanges);
+        }
 
         createCommit(scm, "foo");
 
@@ -264,13 +273,21 @@ public class SubversionCommitTest extends AbstractSubversionTest {
         assertBuildStatusSuccess(p.scheduleBuild2(0).get());
 
         // initial polling on the slave for the code path that doesn't find any change
-        assertFalse(p.poll(createTaskListener()).hasChanges());
+        PollingResult pollResult = p.poll(createTaskListener());
+        if (pollResult.getChange() != PollingResult.Change.INCOMPARABLE) {
+            boolean hasChanges = pollResult.hasChanges();
+            assertFalse(hasChanges);
+        }
 
         createCommit(scm, "bar");
 
         // polling on the slave for the code path that does have a change but should be excluded.
-        assertFalse("Polling found changes that should have been ignored",
-            p.poll(createTaskListener()).hasChanges());
+        pollResult = p.poll(createTaskListener());
+        if (pollResult.getChange() != PollingResult.Change.INCOMPARABLE) {
+            boolean hasChanges = pollResult.hasChanges();
+            assertFalse("Polling found changes that should have been ignored",
+                    hasChanges);
+        }
 
         createCommit(scm, "foo");
 
